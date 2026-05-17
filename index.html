@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Missió Zoé — Illa del tresor</title>
+<style>
+body{font-family:Arial;background:#f5f5f0;padding:20px}
+.card{background:white;padding:15px;margin-top:15px;border-radius:10px}
+button{padding:8px 12px;margin:5px;cursor:pointer}
+.locked{opacity:0.5}
+</style>
+</head>
+<body>
+
+<h1>🏝️ Missió Zoé</h1>
+
+<!-- FAMILLE -->
+<div class="card">
+<h2>1. Famille</h2>
+
+<select id="helper">
+  <option value="m">mon frère</option>
+  <option value="f">ma sœur</option>
+</select>
+
+<button onclick="finishFam()">Fet</button>
+
+<p id="famStatus"></p>
+</div>
+
+<!-- CORPS -->
+<div class="card">
+<h2>2. Corps</h2>
+
+<p>🎧 Escolta vocabulari:</p>
+<button onclick="listen()">🔊 mains</button>
+<button onclick="listen()">🔊 yeux</button>
+
+<p>🎯 Quiz:</p>
+<button onclick="correct()">mains</button>
+<button onclick="wrong()">nez</button>
+
+<p>🎬 Vídeo (mou el cos):</p>
+<iframe width="300" height="200"
+src="https://www.youtube.com/embed/h4eueDYPTIg"></iframe>
+
+<br>
+<button onclick="videoDone()">✅ He fet el vídeo</button>
+
+<p id="videoStatus"></p>
+</div>
+
+<!-- DESCRIPTION -->
+<div class="card">
+<h2>3. Description</h2>
+
+<p>💥 Poder:</p>
+<div id="powers"></div>
+
+<p id="hint">—</p>
+
+<textarea id="text" rows="5" style="width:100%"></textarea>
+
+<br>
+<input id="name" placeholder="Nom">
+
+<button onclick="generate()">Generar</button>
+<button onclick="printPDF()">🖨️ PDF</button>
+</div>
+
+<script>
+let state={
+  famille:false,
+  videoDone:false,
+  power:"mains",
+  gender:"m"
+};
+
+const POWERS={
+  mains:{part:"mains",label:"mains magiques"},
+  yeux:{part:"yeux",label:"yeux spéciaux"},
+  jambes:{part:"jambes",label:"jambes rapides"}
+};
+
+function finishFam(){
+  state.famille=true;
+  state.gender=document.getElementById("helper").value;
+  document.getElementById("famStatus").innerText="✅ Famille completat";
+}
+
+function listen(){
+  speechSynthesis.speak(new SpeechSynthesisUtterance("les mains"));
+}
+
+function correct(){alert("✅")}
+function wrong(){alert("❌")}
+
+function videoDone(){
+  state.videoDone=true;
+  document.getElementById("videoStatus").innerText="🔓 Poder desbloquejat!";
+  buildPowers();
+}
+
+function buildPowers(){
+  let div=document.getElementById("powers");
+  div.innerHTML="";
+
+  Object.keys(POWERS).forEach(k=>{
+    let btn=document.createElement("button");
+
+    if(!state.videoDone){
+      btn.innerText="🔒 "+POWERS[k].label;
+      btn.onclick=()=>alert("Fes el vídeo!");
+    }else{
+      btn.innerText=POWERS[k].label;
+      btn.onclick=()=>{
+        state.power=k;
+        updateHint();
+      }
+    }
+
+    div.appendChild(btn);
+  });
+}
+
+function updateHint(){
+  let p=POWERS[state.power];
+  let pron=state.gender==="f"?"elle":"il";
+
+  document.getElementById("hint").innerText=
+    "Grâce à ses "+p.part+" "+p.label.split(" ")[1]+
+    ", "+pron+" aide Zoé.";
+}
+
+function generate(){
+  let p=POWERS[state.power];
+  let pron=state.gender==="f"?"Elle":"Il";
+
+  let txt=
+  "Bonjour.\n"+
+  pron+" a des "+p.label+".\n"+
+  "Grâce à ses "+p.part+", "+pron.toLowerCase()+
+  " aide Zoé à trouver le trésor.";
+
+  document.getElementById("text").value=txt;
+}
+
+function printPDF(){
+  window.print();
+}
+
+buildPowers();
+</script>
+
+</body>
+</html>
